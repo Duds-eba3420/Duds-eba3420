@@ -1,0 +1,57 @@
+from flask import Flask, render_template, redirect, request
+
+from flask_wtf import FlaskForm
+from matplotlib.pyplot import title
+from wtforms import DateTimeField, FloatField, TextAreaField
+from wtforms.validators import DataRequired
+
+import sqlite3
+from io import StringIO
+import pandas as pd
+
+
+app = Flask(_name_)
+
+app.secret_key = '96599106c1345796161914b392e870e370dcc8e09760c8b68e2370bc8e6f6ee9'
+
+
+from flask import g
+DATABASE = 'movie.db'
+
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE, isolation_level=None)
+    return db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
+
+@app.route("/home")
+def home():
+    conn = get_db()
+   
+    df = pd.read_sql_query("SELECT * from Viewing_",conn)
+    return render_template('home.html', df=df)
+
+if _name_ == '_main_':
+    app.run(debug=True)
+    
+    #And the HTML#
+    
+    <!DOCTYPE html>
+
+{% block main %}
+<div class="container">
+<h1>Welcome to Oslo Cinemax</h1>
+
+
+<div class="table">
+{{ df.to_html(border=0, classes="table")|safe }}
+</div>
+
+</div>
+{% endblock %}
